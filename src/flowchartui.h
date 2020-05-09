@@ -9,6 +9,7 @@
 #define FLOWCHARTUI_H_
 
 #include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Overlay_Window.H>
 #include <FL/Fl_Scroll.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Box.H>
@@ -76,12 +77,13 @@ private:
 
 //+++++++++++++++++++++++++++++++++++++++
 
-class FlowChartMainWindow : public Fl_Double_Window {
+class FlowChartMainWindow : public Fl_Overlay_Window {
 public:
 	FlowChartMainWindow(int x, int y, int w, int h);
 	void registerSymbolSelectedCallback(SymbolClickCallback*, void*);
 	FlowChartCanvas* getCanvas() const {return _pCanvas;}
 	void selectSymbol(SymbolId id);
+	virtual void draw_overlay() {}
 private:
 	static void staticOnSymbolSelected(SymbolId, void*);
 	void onSymbolSelected(SymbolId);

@@ -16,7 +16,7 @@ using namespace std;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 FlowChartMainWindow::FlowChartMainWindow(int x, int y, int w, int h) :
-		Fl_Double_Window(x, y, w, h, "FlowChart Creator")
+		Fl_Overlay_Window(x, y, w, h, "FlowChart Creator")
 {
 	int margin = 10;
 	box(FL_FLAT_BOX);

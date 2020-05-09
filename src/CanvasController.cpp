@@ -43,10 +43,11 @@ void CanvasController::onSymbolBoxPush( SymbolBox *box, int whichButton ) {
 		vector<DragBox*> dragboxes = _pCanvas->getSelectedDragBoxes();
 		if ( dragboxes.size() == 2 ) {
 			_symbolbox_popup->add( "Connect", 0 /*shortcut*/,
-					NULL /*Fl_Callback* */, NULL );
+					NULL /*Fl_Callback* */, NULL, FL_MENU_DIVIDER );
 		}
 
-		_symbolbox_popup->add( "Delete", "^d", NULL, NULL );
+		_symbolbox_popup->add( "Edit label", "", NULL, NULL, FL_MENU_DIVIDER );
+		_symbolbox_popup->add( "Delete", "", NULL, NULL );
 		const Fl_Menu_Item *mi = _symbolbox_popup->popup();
 		if ( mi ) {
 			fprintf( stderr, "text: %s\n", mi->label() );
@@ -79,41 +80,41 @@ void CanvasController::onCanvasPush( Fl_Widget *w ) {
 
 			SymbolBox* pSymbol = addSymbol( _symbolId, x, y );
 
-			x = _pCanvas->parent()->x() + _pCanvas->x();
-			y = _pCanvas->parent()->y() + _pCanvas->y();
-			SymbolBaseDialog *pDlg;
-			if ( _symbolId == SymbolId::DECISION ) {
-				pDlg = new DecisionDialog( x, y );
-			} else {
-				//open default dialog
-				pDlg = new SymbolDialog( x, y );
-			}
-			_isSymbolDialogOpen = true;
-			int rc = pDlg->show( false );
-			// in the dialog:
-			// 2nd: enter new symbol's label
-			// 3rd: choose next symbol "B" to insert
-			// 4th: enter label for connection between A and B
-			// 5th: click OK
-			if( rc ) {
-				// give symbol "A" its label:
-				const char* label = pDlg->getSymbolText();
-				if( label ) {
-					setLabel( pSymbol, label );
-				}
-				// create next symbol "B"
-				SymbolId next = pDlg->getSelectedSymbol();
-				if( next != SymbolId::NONE ) {
-					//todo: find free space for next symbol
-					addSymbol( next, 100, 100 );
-				}
-
-				// create connection and give it its label
-
-
-			}
-			_isSymbolDialogOpen = false;
-
+//			x = _pCanvas->parent()->x() + _pCanvas->x();
+//			y = _pCanvas->parent()->y() + _pCanvas->y();
+//			SymbolBaseDialog *pDlg;
+//			if ( _symbolId == SymbolId::DECISION ) {
+//				pDlg = new DecisionDialog( x, y );
+//			} else {
+//				//open default dialog
+//				pDlg = new SymbolDialog( x, y );
+//			}
+//			_isSymbolDialogOpen = true;
+//			int rc = pDlg->show( false );
+//			// in the dialog:
+//			// 2nd: enter new symbol's label
+//			// 3rd: choose next symbol "B" to insert
+//			// 4th: enter label for connection between A and B
+//			// 5th: click OK
+//			if( rc ) {
+//				// give symbol "A" its label:
+//				const char* label = pDlg->getSymbolText();
+//				if( label ) {
+//					setLabel( pSymbol, label );
+//				}
+//				// create next symbol "B"
+//				SymbolId next = pDlg->getSelectedSymbol();
+//				if( next != SymbolId::NONE ) {
+//					//todo: find free space for next symbol
+//					addSymbol( next, 100, 100 );
+//				}
+//
+//				// create connection and give it its label
+//
+//
+//			}
+//			_isSymbolDialogOpen = false;
+//
 		}
 	}
 }
@@ -164,7 +165,7 @@ void CanvasController::onQuitCallback() {
 		const char* msg = "There are unsaved changes.\n"
 				"Do you want to save before leaving?";
 
-		int rc = fl_choice( msg, "No ", "Yes", NULL );
+		int rc = fl_choice( "%s", "No ", "Yes", NULL, msg );
 
 		if( !rc ) exit( 0 );
 	}

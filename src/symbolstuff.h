@@ -14,7 +14,9 @@
 
 #include <fltk_ext/DragBox.h>
 #include <fltk_ext/TextMeasure.h>
+#include <fltk_ext/TextSplitter.h>
 #include <fltk_ext/Line.h>
+#include <fltk_ext/FlxRect.h>
 #include "dialogs.h"
 
 #include "std.h"
@@ -169,6 +171,16 @@ private:
 	bool _selected = false;
 };
 
+class SymbolLabel : public Fl_Multiline_Input {
+public:
+	SymbolLabel( int x, int y, int w, int h, const char* txt = NULL ) :
+		Fl_Multiline_Input( x, y, w, h )
+	{
+		box( FL_FLAT_BOX );
+	}
+
+};
+
 //+++++++++++++++++++++++++++++++++++++++++
 class SymbolBox;
 typedef void (*MouseCallback)( SymbolBox*, int whichButton, void* );
@@ -182,8 +194,11 @@ public:
     {
 		//color( FL_WHITE );
 		box( FL_NO_BOX );
+		_textSplitter = new TextSplitter( _font, _fontsize );
+		//_label = new SymbolLabel( 1, 1, 1, 1 );
+		//parent()->add( _label );
 	}
-	virtual ~SymbolBox() {}
+	virtual ~SymbolBox() { delete _textSplitter; }
 
 	void registerMouseCallback( MouseCallback, void* data );
 
@@ -194,6 +209,10 @@ public:
 	virtual void drawSymbol();
 
 	virtual SymbolId getSymbolId() const = 0;
+
+	virtual FlxRect getLabelRect() const = 0;
+
+	inline TextSplitter& getTextSplitter() const {return *_textSplitter;}
 
 	void addConnection( Connection* );
 
@@ -214,8 +233,9 @@ public:
 	Fl_Fontsize getLabelFontsize() const {return _labelfontsize;}
 
 protected:
-	/** called by dragbox on PUSH event with right mouse pressed. */
-	virtual void onRightMouse();
+
+	 /* called by dragbox on PUSH event with right mouse pressed. */
+	virtual void onRightMouse( bool isBoxSelected );
 
 	virtual void onMovedOrResized( bool resized, int delta_x, int delta_y );
 
@@ -226,10 +246,15 @@ protected:
 	Fl_Font _labelfont = FL_HELVETICA;
 	Fl_Fontsize _labelfontsize = 13;
 	std::string _label;
+	Fl_Font _font = FL_HELVETICA;
+	Fl_Fontsize _fontsize = 10;
+	Fl_Color _color = FL_BLACK;
+	//SymbolLabel* _label = NULL;
 	MouseCallback _mouseCallback = NULL;
 	void* _mouseCallback_userdata = NULL;
 private:
 	std::vector<Connection*> _connections;
+	TextSplitter* _textSplitter;
 };
 
 //++++++++++++++++++++++++++++++++++++++++
@@ -241,7 +266,7 @@ public:
 	}
 
 	virtual SymbolId getSymbolId() const {return SymbolId::START;}
-
+	virtual FlxRect getLabelRect() const { return {x(), y(), w(), h()};}
 	~Start() {}
 	void drawSymbol();
 
@@ -257,6 +282,7 @@ public:
 	End( int x, int y, int w = 0, int h = 0 ) : Start( x, y, w, h ) {}
 	~End() {}
 	virtual SymbolId getSymbolId() const {return SymbolId::END;}
+	virtual FlxRect getLabelRect() const { return {x(), y(), w(), h()};}
 protected:
 	virtual const char* getText() const { return "End"; }
 };
@@ -271,9 +297,12 @@ public:
 
 	virtual SymbolId getSymbolId() const {return SymbolId::DECISION;}
 
+	virtual FlxRect getLabelRect() const;
+
 	~Decision() {}
 protected:
 	virtual void drawSymbol();
+	void drawLabel() const;
 
 };
 
@@ -286,6 +315,8 @@ public:
 	}
 
 	virtual SymbolId getSymbolId() const {return SymbolId::PROCESS;}
+
+	virtual FlxRect getLabelRect() const;
 
 	~Process() {}
 protected:

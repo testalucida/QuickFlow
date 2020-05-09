@@ -39,11 +39,13 @@ int main() {
 	//ACTIVATE THE FOLLOWING LINE!
 	//pWin->callback( CanvasController::onQuitCallback_static, &ctrl );
 
-//	Decision* dec1 = new Decision( 100, 100, 70, 50 );
-//	ctrl.addSymbol( dec1 );
-//	Decision* dec2 = new Decision( 200, 150, 80, 60 );
-//	ctrl.addSymbol( dec2 );
-//	canvas->createConnection( dec1, dec2 );
+	Decision* dec1 = new Decision( 100, 100, 70, 50 );
+	dec1->setLabel( "Is this a nice label?" );
+	ctrl.addSymbol( dec1 );
+	Decision* dec2 = new Decision( 200, 150, 80, 60 );
+	dec2->setLabel( "Proceed to the left?" );
+	ctrl.addSymbol( dec2 );
+	canvas->createConnection( dec1, dec2 );
 	pWin->show();
 
 	return Fl::run();

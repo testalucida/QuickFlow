@@ -232,7 +232,7 @@ void SymbolBox::registerMouseCallback( MouseCallback cb, void *data ) {
 	_mouseCallback_userdata = data;
 }
 
-void SymbolBox::onRightMouse() {
+void SymbolBox::onRightMouse( bool isBoxSelected ) {
 	if ( _mouseCallback ) {
 		(_mouseCallback)( this, FL_RIGHT_MOUSE, _mouseCallback_userdata );
 	}
@@ -249,49 +249,49 @@ void SymbolBox::drawSymbol() {
 	 * within the symbols.
 	 * An example is to be seen below.
 	 */
-	Fl_Color memo = fl_color();
-	fl_color( FL_DARK2 );
-	fl_line_style( FL_SOLID, 3 );
-	fl_push_clip(x(),y(),w(),h());
-	fl_push_matrix();
-
-	int x1 = x() + 3;
-	int y1 = y() + 3;
-	int x2 = x() + w() - 3;
-	int y2 = y() + h() - 3;
-
-	fl_begin_complex_polygon();
-
-	//draw filled rectangle
-	fl_vertex( (float)x1, (float)y1 );
-	fl_vertex( (float)x2, (float)y1 );
-	fl_vertex( (float)x2, (float)y2 );
-	fl_vertex( (float)x1, (float)y2 );
-	fl_vertex( (float)x1, (float)y1 );
-
-	fl_end_complex_polygon();
-
-	//draw filled smaller rectangle to see an outline
-	x1 += 3;
-	y1 += 3;
-	x2 -= 3;
-	y2 -= 3;
-
-	fl_color( FL_RED );
-	fl_begin_complex_polygon();
-
-	fl_vertex( (float)x1, (float)y1 );
-	fl_vertex( (float)x2, (float)y1 );
-	fl_vertex( (float)x2, (float)y2 );
-	fl_vertex( (float)x1, (float)y2 );
-	fl_vertex( (float)x1, (float)y1 );
-
-	fl_end_complex_polygon();
-
-	fl_pop_matrix();
-	fl_pop_clip();
-	fl_line_style( 0 );
-	fl_color( memo );
+//	Fl_Color memo = fl_color();
+//	fl_color( FL_DARK2 );
+//	fl_line_style( FL_SOLID, 3 );
+//	fl_push_clip(x(),y(),w(),h());
+//	fl_push_matrix();
+//
+//	int x1 = x() + 3;
+//	int y1 = y() + 3;
+//	int x2 = x() + w() - 3;
+//	int y2 = y() + h() - 3;
+//
+//	fl_begin_complex_polygon();
+//
+//	//draw filled rectangle
+//	fl_vertex( (float)x1, (float)y1 );
+//	fl_vertex( (float)x2, (float)y1 );
+//	fl_vertex( (float)x2, (float)y2 );
+//	fl_vertex( (float)x1, (float)y2 );
+//	fl_vertex( (float)x1, (float)y1 );
+//
+//	fl_end_complex_polygon();
+//
+//	//draw filled smaller rectangle to see an outline
+//	x1 += 3;
+//	y1 += 3;
+//	x2 -= 3;
+//	y2 -= 3;
+//
+//	fl_color( FL_RED );
+//	fl_begin_complex_polygon();
+//
+//	fl_vertex( (float)x1, (float)y1 );
+//	fl_vertex( (float)x2, (float)y1 );
+//	fl_vertex( (float)x2, (float)y2 );
+//	fl_vertex( (float)x1, (float)y2 );
+//	fl_vertex( (float)x1, (float)y1 );
+//
+//	fl_end_complex_polygon();
+//
+//	fl_pop_matrix();
+//	fl_pop_clip();
+//	fl_line_style( 0 );
+//	fl_color( memo );
 }
 
 void SymbolBox::addConnection( Connection *c ) {
@@ -299,8 +299,8 @@ void SymbolBox::addConnection( Connection *c ) {
 }
 
 void SymbolBox::setLabel( const char *txt ) {
-	_label.clear();
-	_label.append( txt );
+	//_label->value( txt );
+	_label = txt;
 }
 
 void SymbolBox::setBorderColor( Fl_Color color ) {
@@ -419,6 +419,28 @@ void Decision::drawSymbol() {
 	fl_color( memo );
 
 	fl_line_style( 0 );
+
+	drawLabel();
+}
+
+void Decision::drawLabel() const {
+	FlxRect rect = getLabelRect();
+	string& split = getTextSplitter().split( _label.c_str(), rect.w, rect.h );
+	Fl_Color old = fl_color();
+	fl_color( _color );
+	fl_font( _font, _fontsize );
+	fl_draw( split.c_str(), rect.x, rect.y, rect.w, rect.h, FL_ALIGN_CENTER, NULL, 0 );
+
+	fl_color( old );
+}
+
+FlxRect Decision::getLabelRect() const {
+	FlxRect rect;
+	rect.x = x() + w()/3;
+	rect.y = y() + h()/3;
+	rect.w = w()/3;
+	rect.h = h()/3;
+	return rect;
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -457,6 +479,10 @@ void Process::drawSymbol() {
 	fl_end_polygon();
 
 	fl_line_style( 0 );
+}
+
+FlxRect Process::getLabelRect() const {
+	return {x() + 3, y() + 3, w() - 6, h() - 6};
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -694,4 +720,5 @@ int testSymbolStuff() {
 
 	return Fl::run();
 }
+
 
