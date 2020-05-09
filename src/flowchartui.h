@@ -18,6 +18,7 @@
 #include <fltk_ext/Canvas.h>
 
 #include "symbolstuff.h"
+#include "Connection.hpp"
 
 //+++++++++++++++++++++++++++++++++++++++
 
@@ -60,7 +61,7 @@ public:
 	FlowChartCanvas( int x, int y, int w, int h );
 	void registerEventCallback( CanvasCallback ccb, void* pUserdata) ;
 	/** creates a connection between the given SymbolBoxes */
-	void createConnection( SymbolBox* box1, SymbolBox* box2 );
+	Connection* createConnection( SymbolBox* box1, SymbolBox* box2 );
 	/** remove all connections concerning the given SymbolBox */
 	void removeConnections( SymbolBox* );
 protected:

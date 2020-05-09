@@ -105,100 +105,21 @@ public:
 
 //+++++++++++++++++++++++++++++++++++++++++
 
-class SymbolBox;
-
-//struct Point {
-//	int x = 0;
-//	int y = 0;
-//};
-
-class Connection {
-public:
-	Connection( SymbolBox* box1, SymbolBox* box2 );
-	virtual ~Connection();
-
-	/** give the connection a label which will be
-	 * drawn at appropriate position
-	 */
-	void setLabel( const char* );
-
-	const char* getLabel() const { return _labelBox->label(); }
-
-	/**
-	 * Checks if the given point (x, y) is "nearby"
-	 * this Connection. Nearby means a distance less or equal
-	 * the width of this Connection.
-	 */
-	bool isNearby( int x, int y ) const;
-
-	/**
-	 * Per default, a straight line is drawn between the
-	 * two boxes to connect.
-	 * If an angled connection is wanted, an additional
-	 * point can be added using this method.
-	 */
-	void addPoint( int x, int y );
-	void setSelected( bool selected );
-	/**
-	 * One of the two connected objects has moved.
-	 * Adjust this connection line.
-	 * @ box: the moved box
-	 * @ delta_x: horizontal amount of moving
-	 * @ delta_y: vertical amount of moving
-	 */
-	void draw();
-	void setColor( Fl_Color );
-	void setWidth( int w );
-
-	SymbolBox* box1() { return _box1; }
-	SymbolBox* box2() { return _box2; }
-
-private:
-//	inline bool isPointOnLine( const Point check,
-//			                   const Point*, const Point* ) const;
-	inline bool isElementOf( DragBox* box, int x, int y ) const;
-	inline bool boxesInTouch() const;
-	inline Intersection getIntersection( DragBox* box, Line& line ) const;
-	void drawLabel( Line& line ) const;
-
-private:
-	Fl_Box* _labelBox;
-	SymbolBox* _box1;
-	SymbolBox* _box2;
-	std::vector<Point*> _points;
-	Fl_Color _color = FL_DARK2;
-	int _w = 3;
-	bool _selected = false;
-};
-
-class SymbolLabel : public Fl_Multiline_Input {
-public:
-	SymbolLabel( int x, int y, int w, int h, const char* txt = NULL ) :
-		Fl_Multiline_Input( x, y, w, h )
-	{
-		box( FL_FLAT_BOX );
-	}
-
-};
 
 //+++++++++++++++++++++++++++++++++++++++++
 class SymbolBox;
 typedef void (*MouseCallback)( SymbolBox*, int whichButton, void* );
 //++++++++++++++++++++++++++++++++++++++++++
 
-//#include <FL/Fl_SVG_Image.H>
 class SymbolBox : public DragBox {
 public:
-	SymbolBox(int x, int y, int w, int h) :
-		DragBox(x, y, w, h)
-    {
-		//color( FL_WHITE );
+	SymbolBox( int x, int y, int w, int h ) : DragBox( x, y, w, h ) {
 		box( FL_NO_BOX );
-		_textSplitter = new TextSplitter( _font, _fontsize );
-		//_label = new SymbolLabel( 1, 1, 1, 1 );
-		//parent()->add( _label );
+//		if( !_textSplitter ) {
+//			_textSplitter = new TextSplitter( _font, _fontsize );
+//		}
 	}
-	virtual ~SymbolBox() { delete _textSplitter; }
+	virtual ~SymbolBox() {}
 
 	void registerMouseCallback( MouseCallback, void* data );
 
@@ -210,11 +131,7 @@ public:
 
 	virtual SymbolId getSymbolId() const = 0;
 
-	virtual FlxRect getLabelRect() const = 0;
-
-	inline TextSplitter& getTextSplitter() const {return *_textSplitter;}
-
-	void addConnection( Connection* );
+	//void addConnection( Connection* );
 
 	//label
 	void setLabel(const char* txt);
@@ -233,6 +150,18 @@ public:
 	Fl_Fontsize getLabelFontsize() const {return _labelfontsize;}
 
 protected:
+	/** get the Rectangle to draw the label text in. */
+	virtual FlxRect getLabelRect() const = 0;
+
+	/** get the one and only instance of TextSplitter */
+	static inline TextSplitter& getTextSplitter() {
+		static TextSplitter* _textSplitter = NULL;
+		if( _textSplitter == NULL ) _textSplitter = new TextSplitter(1, 10);
+		return *_textSplitter;
+	}
+
+	/** draw the label */
+	virtual void drawLabel() const = 0;
 
 	 /* called by dragbox on PUSH event with right mouse pressed. */
 	virtual void onRightMouse( bool isBoxSelected );
@@ -249,12 +178,10 @@ protected:
 	Fl_Font _font = FL_HELVETICA;
 	Fl_Fontsize _fontsize = 10;
 	Fl_Color _color = FL_BLACK;
-	//SymbolLabel* _label = NULL;
 	MouseCallback _mouseCallback = NULL;
 	void* _mouseCallback_userdata = NULL;
 private:
-	std::vector<Connection*> _connections;
-	TextSplitter* _textSplitter;
+	//std::vector<Connection*> _connections;
 };
 
 //++++++++++++++++++++++++++++++++++++++++
@@ -269,6 +196,7 @@ public:
 	virtual FlxRect getLabelRect() const { return {x(), y(), w(), h()};}
 	~Start() {}
 	void drawSymbol();
+	virtual void drawLabel() const {}
 
 protected:
 	virtual const char* getText() const { return "Start"; }
@@ -302,7 +230,7 @@ public:
 	~Decision() {}
 protected:
 	virtual void drawSymbol();
-	void drawLabel() const;
+	virtual void drawLabel() const;
 
 };
 
@@ -321,6 +249,7 @@ public:
 	~Process() {}
 protected:
 	virtual void drawSymbol();
+	virtual void drawLabel() const;
 
 };
 

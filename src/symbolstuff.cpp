@@ -294,9 +294,9 @@ void SymbolBox::drawSymbol() {
 //	fl_color( memo );
 }
 
-void SymbolBox::addConnection( Connection *c ) {
-	_connections.push_back( c );
-}
+//void SymbolBox::addConnection( Connection *c ) {
+//	_connections.push_back( c );
+//}
 
 void SymbolBox::setLabel( const char *txt ) {
 	//_label->value( txt );
@@ -481,6 +481,9 @@ void Process::drawSymbol() {
 	fl_line_style( 0 );
 }
 
+void Process::drawLabel() const {
+}
+
 FlxRect Process::getLabelRect() const {
 	return {x() + 3, y() + 3, w() - 6, h() - 6};
 }
@@ -536,147 +539,30 @@ void SymbolFactory::setSizeAndPosition( SymbolBox *pSymbol, int x, int y, int w,
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Connection::Connection( SymbolBox *box1, SymbolBox *box2 ) :
-		_box1( box1 ), _box2( box2 )
-{
-	_labelBox = new Fl_Box( 0, 0, 0, 0 );
-}
-
-Connection::~Connection() {
-	for ( auto p : _points ) {
-		delete p;
-	}
-}
-
-void Connection::setLabel( const char* lbl ) {
-	_labelBox->label( lbl );
-	//todo: log
-}
 
 
-void Connection::addPoint( int x, int y ) {
-	Point *p = new Point();
-	p->x = x;
-	p->y = y;
-	_points.push_back( p );
-}
 
-void Connection::draw() {
-	//don't try to draw any line when boxes are in contact:
-	if ( boxesInTouch() )
-		return;
-	int x1, y1, x2, y2;
-	_box1->getCenter( x1, y1 );
-	_box2->getCenter( x2, y2 );
-	Line line( x1, y1, x2, y2 ); //the line to draw
 
-	fl_line_style( FL_SOLID, 3 );
-	Fl_Color memo = fl_color();
-	Fl_Color color = _selected ? FL_YELLOW : FL_DARK2;
-	fl_color( color );
-	fl_begin_line();
-	fl_vertex( x1, y1 );
-	fl_vertex( x2, y2 );
-	fl_end_line();
 
-	fl_line_style( 0 );
-	fl_color( memo );
 
-	drawLabel( line );
-}
 
-void Connection::drawLabel( Line& line ) const {
 
-}
 
-inline Intersection Connection::getIntersection( DragBox *box,
-		Line &line ) const {
-	//which sideline does line intersect?
-	//get all 4 vertices of box:
-	int x1 = box->x();
-	int x2 = x1 + box->w();
-	int y1 = box->y();
-	int y2 = y1 + box->h();
 
-	//intersects with top line?
-	Line topline( x1, y1, x2, y1 );
-	Intersection X = topline.getIntersection( line );
-	if ( X.intersects && X.withinSegments ) {
-		return X;
-	} else {
-		//right sideline?
-		Line rightline( x2, y1, x2, y2 );
-		X = rightline.getIntersection( line );
-		if ( X.intersects && X.withinSegments ) {
-			return X;
-		} else {
-			//bottom line?
-			Line bottomline( x1, y2, x2, y2 );
-			X = bottomline.getIntersection( line );
-			if ( X.intersects && X.withinSegments ) {
-				return X;
-			} else {
-				//left sideline?
-				Line bottomline( x1, y1, x1, y2 );
-				X = bottomline.getIntersection( line );
-				return X;
-			}
-		}
-	} //!X.intersects
-}  //Intersection getIntersection( ...
 
-bool Connection::isNearby( int x, int y ) const {
-	fprintf( stderr, "checking point %d/%d\n", x, y );
-	int c1x, c1y, c2x, c2y;
-	_box1->getCenter( c1x, c1y );
-	_box2->getCenter( c2x, c2y );
-	Line line( c1x, c1y, c2x, c2y );
 
-	fprintf( stderr, "line created from %d/%d to %d/%d. m=%f, b=%f\n", c1x, c1y,
-			c2x, c2y, line.m(), line.b() );
-	return (line.getDistance( x, y ) <= _w);
-}
 
-void Connection::setColor( Fl_Color color ) {
-}
 
-void Connection::setSelected( bool selected ) {
-	_selected = selected;
-}
 
-void Connection::setWidth( int w ) {
-	_w = w;
-}
 
-inline bool Connection::isElementOf( DragBox *box, int x, int y ) const {
-	if ( x < box->x() || x > box->x() + box->w() )
-		return false;
-	if ( y < box->y() || y > box->y() + box->h() )
-		return false;
-	return true;
-}
 
-inline bool Connection::boxesInTouch() const {
-	int x21 = _box2->x();
-	int y21 = _box2->y();
-	if ( isElementOf( _box1, x21, y21 ) )
-		return true;
-	int x22 = x21 + _box2->w();
-	if ( isElementOf( _box1, x22, y21 ) )
-		return true;
-	int y22 = _box2->y() + _box2->h();
-	if ( isElementOf( _box1, x22, y22 ) )
-		return true;
-	if ( isElementOf( _box1, x21, y22 ) )
-		return true;
-	//still here ==> _box2 is either completey contained by _box1
-	//or they don't touch each other at all.
-	//One additional check is enough:
-	if ( isElementOf( _box2, _box1->x(), _box1->y() ) )
-		return true;
 
-	return false;
-}
+
+
+
+
+
+
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

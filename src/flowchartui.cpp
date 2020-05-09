@@ -119,9 +119,10 @@ FlowChartCanvas::FlowChartCanvas(int x, int y, int w, int h) :
 	color(FL_WHITE);
 }
 
-void FlowChartCanvas::createConnection( SymbolBox* box1, SymbolBox* box2 ) {
+Connection* FlowChartCanvas::createConnection( SymbolBox* box1, SymbolBox* box2 ) {
 	Connection* conn = new Connection( box1, box2 );
 	_connections.push_back( conn );
+	return conn;
 }
 
 void FlowChartCanvas::removeConnections( SymbolBox* box1 ) {

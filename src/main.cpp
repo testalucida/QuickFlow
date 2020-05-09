@@ -45,7 +45,8 @@ int main() {
 	Decision* dec2 = new Decision( 200, 150, 80, 60 );
 	dec2->setLabel( "Proceed to the left?" );
 	ctrl.addSymbol( dec2 );
-	canvas->createConnection( dec1, dec2 );
+	Connection* conn = canvas->createConnection( dec1, dec2 );
+	conn->setLabel("Yes");
 	pWin->show();
 
 	return Fl::run();
