@@ -109,6 +109,7 @@ public:
 //+++++++++++++++++++++++++++++++++++++++++
 class SymbolBox;
 typedef void (*MouseCallback)( SymbolBox*, int whichButton, void* );
+typedef std::unique_ptr<Line> LinePtr;
 //++++++++++++++++++++++++++++++++++++++++++
 
 class SymbolBox : public DragBox {
@@ -131,7 +132,12 @@ public:
 
 	virtual SymbolId getSymbolId() const = 0;
 
-	//void addConnection( Connection* );
+	/** get border of symbol box as line object */
+	LinePtr getNorthBorder() const;
+	LinePtr getEastBorder() const;
+	LinePtr getSouthBorder() const;
+	LinePtr getWestBorder() const;
+
 
 	//label
 	void setLabel(const char* txt);

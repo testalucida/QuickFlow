@@ -19,8 +19,21 @@
 #include <iostream>
 using namespace std;
 
+int test() {
+	double d = 45.0;
+	double m = tan( d );
+	fprintf( stderr, "tangens of %f degrees makes a gradient of %f\n", d, m );
+
+	double m2 = 1.732050808;
+	double d2 = atan( m2 ) * 180 / PI;
+	fprintf( stderr, "a gradient of %f corresponds to %f degrees\n", m2, d2 );
+	//Line line( 0, 0, 0, 4);
+	//fprintf( stderr, "gradient angle: %f\n", line.getGradientAngle() );
+	return 1;
+}
 
 int main() {
+	//return test();
 	FlowChartMainWindow *pWin =
 			new FlowChartMainWindow(200, 200, 500, 500 );
 
@@ -46,7 +59,7 @@ int main() {
 	dec2->setLabel( "Proceed to the left?" );
 	ctrl.addSymbol( dec2 );
 	Connection* conn = canvas->createConnection( dec1, dec2 );
-	conn->setLabel("Yes");
+	conn->setLabel("Yes", dec1);
 	pWin->show();
 
 	return Fl::run();

@@ -320,6 +320,31 @@ void SymbolBox::setLabelFontsize( Fl_Fontsize h ) {
 	_labelfontsize = h;
 }
 
+
+LinePtr SymbolBox::getNorthBorder() const {
+	int Y = y();
+	LinePtr line( new Line( x(), Y, x() + w(), Y ) );
+	return line;
+}
+
+LinePtr SymbolBox::getEastBorder() const {
+	int X = x() + w();
+	LinePtr line( new Line( X, y(), X, y() + h() ) );
+	return line;
+}
+
+LinePtr SymbolBox::getSouthBorder() const {
+	int Y = y() + h();
+	LinePtr line( new Line( x(), Y, x() + w(), Y ) );
+	return line;
+}
+
+LinePtr SymbolBox::getWestBorder() const {
+	int X = x();
+	LinePtr line( new Line( X, y(), X, y() + h() ) );
+	return line;
+}
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 void Start::drawSymbol() {
@@ -606,5 +631,4 @@ int testSymbolStuff() {
 
 	return Fl::run();
 }
-
 
