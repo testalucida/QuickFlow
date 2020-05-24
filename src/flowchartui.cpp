@@ -6,19 +6,18 @@
  */
 
 #include "flowchartui.h"
+#include "SymbolBox.hpp"
 #include <FL/Fl_Toggle_Button.H>
 #include "std.h"
-
-//#include <fltk_ext/Canvas.h>
+#include "IClientArea.h"
 
 using namespace std;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 FlowChartMainWindow::FlowChartMainWindow(int x, int y, int w, int h) :
-		Fl_Overlay_Window(x, y, w, h, "FlowChart Creator")
+		Fl_Window(x, y, w, h, "FlowChart Creator")
 {
-	int margin = 10;
 	box(FL_FLAT_BOX);
 	color(FL_DARK1);
 	_pMenuBar = new FlowChartMenuBar(0, 0, w, 25);
@@ -29,8 +28,10 @@ FlowChartMainWindow::FlowChartMainWindow(int x, int y, int w, int h) :
 	_pStatusBar = new StatusBar(0, h - status_h, w, status_h);
 
 	int canvas_h = h - _pMenuBar->h() - _pToolBar->h() - _pStatusBar->h();
-	_pCanvas = new FlowChartCanvas(0+margin, _pToolBar->y() + _pToolBar->h(),
-			              w-2*margin, canvas_h);
+	_pCanvas = new FlowChartCanvas( 0 + _margin_x,
+			                        _pToolBar->y() + _pToolBar->h(),
+			                        w - 2*_margin_x,
+									canvas_h );
 	_pCanvas->end();
 
 	resizable(_pCanvas);
@@ -165,6 +166,12 @@ int FlowChartCanvas::handle(int e) {
 }
 
 void FlowChartCanvas::draw_then() {
+	IClientArea* ca = dynamic_cast<IClientArea*>( parent() );
+	if( ca ) {
+		int scbw = this->scrollbar.w();
+		FlxRectPtr rect = ca->getClientArea();
+		fl_push_clip( rect->x, rect->y, rect->w - scbw, rect->h );
+	}
 	//first draw the connections...
 	for( auto conn : _connections ) {
 		conn->draw();
@@ -179,6 +186,10 @@ void FlowChartCanvas::draw_then() {
 	//This order is important hence the connections which are
 	//drawn from one box' to the other box' centers cannot be
 	//seen within the boxes.
+
+	if( ca ) {
+		fl_pop_clip();
+	}
 }
 
 void FlowChartCanvas::checkSelectConnectionAt( int x, int y ) {

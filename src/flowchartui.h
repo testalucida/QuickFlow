@@ -19,6 +19,7 @@
 
 #include "symbolstuff.h"
 #include "Connection.hpp"
+#include "IClientArea.h"
 
 //+++++++++++++++++++++++++++++++++++++++
 
@@ -78,17 +79,26 @@ private:
 
 //+++++++++++++++++++++++++++++++++++++++
 
-class FlowChartMainWindow : public Fl_Overlay_Window {
+class FlowChartMainWindow : public Fl_Window, public IClientArea {
 public:
 	FlowChartMainWindow(int x, int y, int w, int h);
 	void registerSymbolSelectedCallback(SymbolClickCallback*, void*);
 	FlowChartCanvas* getCanvas() const {return _pCanvas;}
 	void selectSymbol(SymbolId id);
-	virtual void draw_overlay() {}
+
+	FlxRectPtr getClientArea() const {
+		FlxRectPtr rect( new FlxRect );
+		rect->x = _margin_x;
+		rect->y = _pToolBar->y() + _pToolBar->h();
+		rect->w = w() - 2*_margin_x;
+		rect->h = h() - _pMenuBar->h() - _pToolBar->h() - _pStatusBar->h();
+		return rect;
+	}
 private:
 	static void staticOnSymbolSelected(SymbolId, void*);
 	void onSymbolSelected(SymbolId);
 private:
+	int _margin_x = 10;
 	FlowChartMenuBar* _pMenuBar;
 	FlowChartToolBar* _pToolBar;
 	StatusBar* _pStatusBar;

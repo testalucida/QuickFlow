@@ -10,7 +10,7 @@
 
 #include <FL/Enumerations.H>
 #include <FL/fl_draw.H>
-#include "symbolstuff.h"
+#include "SymbolBox.hpp"
 #include <stdexcept>
 
 enum Compass {
@@ -94,6 +94,9 @@ public:
 		_box1->getCenter( x1, y1 );
 		_box2->getCenter( x2, y2 );
 		Line line( x1, y1, x2, y2 ); //the line to draw
+		//get the glue point for this line:
+		_box1->getGluePoint( line, x1, y1 );
+		_box2->getGluePoint( line, x2, y2 );
 
 		fl_line_style( FL_SOLID, 3 );
 		Fl_Color memo = fl_color();
@@ -152,48 +155,16 @@ private:
 		return false;
 	}
 
-//	inline Intersection getIntersection( DragBox *box,
-//			Line &line ) const {
-//		//which sideline does line intersect?
-//		//get all 4 vertices of box:
-//		int x1 = box->x();
-//		int x2 = x1 + box->w();
-//		int y1 = box->y();
-//		int y2 = y1 + box->h();
-//
-//		//intersects with top line?
-//		Line topline( x1, y1, x2, y1 );
-//		Intersection X = topline.getIntersection( line );
-//		if ( X.intersects && X.withinSegments ) {
-//			return X;
-//		} else {
-//			//right sideline?
-//			Line rightline( x2, y1, x2, y2 );
-//			X = rightline.getIntersection( line );
-//			if ( X.intersects && X.withinSegments ) {
-//				return X;
-//			} else {
-//				//bottom line?
-//				Line bottomline( x1, y2, x2, y2 );
-//				X = bottomline.getIntersection( line );
-//				if ( X.intersects && X.withinSegments ) {
-//					return X;
-//				} else {
-//					//left sideline?
-//					Line bottomline( x1, y1, x1, y2 );
-//					X = bottomline.getIntersection( line );
-//					return X;
-//				}
-//			}
-//		} //!X.intersects
-//	}  //Intersection getIntersection( ...
-
 	/** draws this connection's label */
 	void drawLabel( const Line& conn ) const {
+		if( _label.empty() ) return;
 		fprintf( stderr, "m = %f\n", conn.m() );
 		fl_color( _labelcolor );
 		fl_font( _font, _fontsize );
 		double angle = conn.getGradientAngle() * (-1);
+		if( conn.isVertical() ) {
+			angle = 0.0;
+		}
 
 		if( !_nearerBox ) {
 			//draw somewhere in the middle between the two connected boxes
@@ -205,30 +176,39 @@ private:
 			//calculate intersection between
 			//connection and the nearerBox' border
 			//and draw a little bit outside of nearerBox.
+
 			//Where does this connection intersects nearerBox?
 			SymbolBox* other = (_nearerBox == _box1 ) ? _box2 : _box1;
 			int xc, yc, xoc, yoc;
 			_nearerBox->getCenter( xc, yc );
 			other->getCenter( xoc, yoc );
 			Compass cmp = Compass::NORTH;
-			//todo: behaviour if connection is vertical
-			if( xoc > xc ) {
-				if( isBetween( conn.m(), -1, 1 ) ) {
-					//connection intersects nearerBox in the east
-					cmp = Compass::EAST;
-				} else if( conn.m() > 0 ) {
+
+			if( xoc == xc ) {
+				//conn is vertical
+				if( yoc > yc ) {
 					cmp = Compass::SOUTH;
 				}
 			} else {
-				//xoc <= xc
-				if( isBetween( conn.m(), -1, 1 ) ) {
-					cmp = Compass::WEST;
-				} else if( conn.m() < -1 ) {
-					cmp = Compass::SOUTH;
+				if( xoc > xc ) { //east or south
+					if( isBetween( conn.m(), -1, 1 ) ) {
+						//connection intersects nearerBox in the east
+						cmp = Compass::EAST;
+					} else if( conn.m() > 0 ) {
+						cmp = Compass::SOUTH;
+					}
+				} else { //west or south
+					//xoc <= xc
+					if( isBetween( conn.m(), -1, 1 ) ) {
+						cmp = Compass::WEST;
+					} else if( conn.m() < -1 ) {
+						cmp = Compass::SOUTH;
+					}
 				}
 			}
 			X = getIntersection( conn, _nearerBox, cmp );
-			fl_draw( angle, _label.c_str(), X->x, X->y );
+//			fl_draw( angle, _label.c_str(), X->x, X->y );
+			fl_draw( _label.c_str(), X->x, X->y );
 		}
 	}
 

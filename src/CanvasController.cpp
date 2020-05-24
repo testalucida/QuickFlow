@@ -6,7 +6,8 @@
  */
 
 #include "CanvasController.h"
-
+#include "SymbolFactory.hpp"
+#include "SymbolBox.hpp"
 #include <FL/names.h>
 #include <FL/Fl_Menu_Button.H>
 #include <FL/fl_ask.H>
@@ -78,43 +79,8 @@ void CanvasController::onCanvasPush( Fl_Widget *w ) {
 
 			// 1st: insert new symbol "A"
 
-			SymbolBox* pSymbol = addSymbol( _symbolId, x, y );
+			/*SymbolBox* pSymbol =*/ addSymbol( _symbolId, x, y );
 
-//			x = _pCanvas->parent()->x() + _pCanvas->x();
-//			y = _pCanvas->parent()->y() + _pCanvas->y();
-//			SymbolBaseDialog *pDlg;
-//			if ( _symbolId == SymbolId::DECISION ) {
-//				pDlg = new DecisionDialog( x, y );
-//			} else {
-//				//open default dialog
-//				pDlg = new SymbolDialog( x, y );
-//			}
-//			_isSymbolDialogOpen = true;
-//			int rc = pDlg->show( false );
-//			// in the dialog:
-//			// 2nd: enter new symbol's label
-//			// 3rd: choose next symbol "B" to insert
-//			// 4th: enter label for connection between A and B
-//			// 5th: click OK
-//			if( rc ) {
-//				// give symbol "A" its label:
-//				const char* label = pDlg->getSymbolText();
-//				if( label ) {
-//					setLabel( pSymbol, label );
-//				}
-//				// create next symbol "B"
-//				SymbolId next = pDlg->getSelectedSymbol();
-//				if( next != SymbolId::NONE ) {
-//					//todo: find free space for next symbol
-//					addSymbol( next, 100, 100 );
-//				}
-//
-//				// create connection and give it its label
-//
-//
-//			}
-//			_isSymbolDialogOpen = false;
-//
 		}
 	}
 }
