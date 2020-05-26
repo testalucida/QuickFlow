@@ -260,13 +260,31 @@ public:
 	}
 
 	/**
-	 * Gets the glue point of this symbol for a given line.
+	 * Gets the glue point of this DataStorage symbol
+	 * for a given line (the connection)
 	 */
 	virtual void getGluePoint( const Line& line, int& x, int& y ) const {
+		//first check roughly which part of the the symbolbox is hit by line
 		LinePtr border = getNorthBorder();
 		IntersectionPtr X = border->getIntersection( line );
-		if( X->intersects && X->withinSegments() ) {
+		if( X->intersects && X->withinSegments ) {
 
+			//fprintf( stderr, "intersecting north border\n" );
+			//line is coming in from north. Find intersection of line
+			//with the upper reversed bowl.
+			//get perpendicular from circle's center to line:
+//			LinePtr perp = line.getPerpendicular( _topReverseBowl->mx,
+//					                              _topReverseBowl->my );
+			//perp->x2/perp->y2 are the coords of the intersection.
+			//This point be F. Now search for the coords of the intersection
+			//of line with _topReversedBowl which be S.
+			//The center of the top reversed bowl may be M.
+			//First get the length of FM...
+//			float fm = perp->getLength();
+			//...then get length of FS..
+//			float fs = sqrt( pow( _topReverseBowl->r, 2 ) - pow( fm, 2 ) );
+			//...and calculate coords of S:
+			//x =
 		}
 
 		//delete that, it's only temporaryly until the calculation of the glue point is fixed
@@ -286,41 +304,42 @@ protected:
 	}
 
 	inline void drawDataStorage() const {
-		CirclePtr circle = getCircle();
+		_topReverseBowl = getCircle();
 //		fprintf( stderr, "CIRCLE: ax = %f, ay = %f, "
 //				         "mx = %f, my = %f\n",
 //						 circle->ax, circle->ay,
 //				         circle->mx, circle->my );
 		float startAngle = 0;
 		float angle = _glDrawing.getRadiantFromDegree( 180 );
-		int numSeg = _glDrawing.getNumCircleSegments( circle->r );
-		//semicircle from west to east (reverse bowl):
+		int numSeg = _glDrawing.getNumCircleSegments( _topReverseBowl->r );
+		//top semicircle opening southwards (reverse bowl):
 //		fprintf( stderr, "drawing black reverse bowl: my(fltk): %f, "
 //						                             "my(gl): %f\n",
 //													 circle->my,
 //													 glY( circle->my ) );
-		_glDrawing.drawArcFast( circle->mx,
-								glY( circle->my ), circle->r,
+		_glDrawing.drawArcFast( _topReverseBowl->mx,
+								glY( _topReverseBowl->my ), _topReverseBowl->r,
 								startAngle, angle, numSeg, 2 );
 
-		//semicircle from east to west (bowl):
+		//top semicircle opening northwards (bowl):
 		float ay = h()/_party * 2;
 //		fprintf( stderr, "ay = %f\n", ay );
-		float my = circle->my - 2*circle->r + ay;
+		float my = _topReverseBowl->my - 2*_topReverseBowl->r + ay;
 //		fprintf( stderr, "drawing blue bowl: my(fltk): %f, "
 //				                            "my(gl): %f\n", my, glY( my ) );
 		startAngle = _glDrawing.getRadiantFromDegree( 180 );
 //		gl_color( FL_BLUE );
-		_glDrawing.drawArcFast( circle->mx,
-								glY( my ), circle->r,
+		_glDrawing.drawArcFast( _topReverseBowl->mx,
+								glY( my ), _topReverseBowl->r,
 								startAngle, angle, numSeg, 2 );
 
+		//bottom semicircle opening northwards
 		my += ( h() - ay );
 //		fprintf( stderr, "drawing yellow bowl: my(fltk): %f, "
 //				         "my(gl): %f\n", my, glY( my ) );
 //		gl_color( FL_YELLOW );
-		_glDrawing.drawArcFast( circle->mx,
-								glY( my ), circle->r,
+		_glDrawing.drawArcFast( _topReverseBowl->mx,
+								glY( my ), _topReverseBowl->r,
 								startAngle, angle, numSeg, 2 );
 
 //		gl_color( FL_GREEN );
@@ -333,6 +352,7 @@ protected:
 //				         x1, y1, x1, glY(y1), x1, y2, x1, glY( y2 ) );
 		_glDrawing.drawLineSegment( x1, glY( y1 ), x1, glY( y2 ), 2 );
 		_glDrawing.drawLineSegment( x2, glY( y1 ), x2, glY( y2 ), 2 );
+
 	}
 
 	virtual void drawLabel() const {}
@@ -397,6 +417,7 @@ private:
 private:
 	glDrawing& _glDrawing = glDrawing::inst();
 	int _party = 5;
+	mutable CirclePtr _topReverseBowl;
 };
 
 #endif /* SYMBOLBOX_DERIVATES_HPP_ */

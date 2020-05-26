@@ -104,7 +104,7 @@ void FlowChartToolBar::staticSymbolCallback(SymbolId id, void* data) {
 }
 
 void FlowChartToolBar::symbolCallback(SymbolId id) const {
-	fprintf(stderr, "FlowChartToolBar::symbolCallback: selected: %d\n", id);
+	//fprintf(stderr, "FlowChartToolBar::symbolCallback: selected: %d\n", id);
 	//forward to registered callback:
 	if (_cb) {
 		(*_cb)(id, _data);

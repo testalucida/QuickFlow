@@ -50,7 +50,7 @@ public:
 	 * the width of this Connection.
 	 */
 	bool isNearby( int x, int y ) const {
-		fprintf( stderr, "checking point %d/%d\n", x, y );
+		//fprintf( stderr, "checking point %d/%d\n", x, y );
 		int c1x, c1y, c2x, c2y;
 		_box1->getCenter( c1x, c1y );
 		_box2->getCenter( c2x, c2y );

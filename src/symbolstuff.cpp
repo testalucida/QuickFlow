@@ -140,7 +140,7 @@ void SymbolBar::onSymbolClick( SymbolButton *b ) {
 		}
 	}
 
-	fprintf( stderr, "click: %d\n", b->getSymbolId() );
+	//fprintf( stderr, "click: %d\n", b->getSymbolId() );
 	if ( _cb ) {
 		(*_cb)( _selectedSymbol, _data );
 	}

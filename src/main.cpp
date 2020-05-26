@@ -66,8 +66,29 @@ int main_() {
 	return Fl::run();
 }
 
+
+bool circleLineIntersect(float x1, float y1, float x2, float y2, float cx, float cy, float cr ) {
+	float dx = x2 - x1;
+	float dy = y2 - y1;
+	float a = dx * dx + dy * dy;
+	float b = 2 * (dx * (x1 - cx) + dy * (y1 - cy));
+	float c = cx * cx + cy * cy;
+	c += x1 * x1 + y1 * y1;
+	c -= 2 * (cx * x1 + cy * y1);
+	c -= cr * cr;
+	float bb4ac = b * b - 4 * a * c;
+
+	// return false  No collision
+	// return true Collision
+	return bb4ac >= 0;
+}
+
+int test2() {
+	circleLineIntersect( 8, 5, 0, 1, 4, 2, 3 );
+}
+
 int main() {
-	//return test();
+	return test2();
 	FlowChartMainWindow *pWin =
 			new FlowChartMainWindow(200, 200, 500, 500 );
 

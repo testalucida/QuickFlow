@@ -34,7 +34,7 @@ void CanvasController::onSymbolBoxPush_static( SymbolBox *box, int whichButton,
 }
 
 void CanvasController::onSymbolBoxPush( SymbolBox *box, int whichButton ) {
-	fprintf( stderr, "CanvasController::onSymbolBoxPush\n" );
+	//fprintf( stderr, "CanvasController::onSymbolBoxPush\n" );
 	if ( whichButton == FL_RIGHT_MOUSE ) {
 		//show popup menu.
 		_symbolbox_popup = new Fl_Menu_Button( box->x(), box->y(), 300, 100 );
