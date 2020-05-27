@@ -67,24 +67,43 @@ int main_() {
 }
 
 
-bool circleLineIntersect(float x1, float y1, float x2, float y2, float cx, float cy, float cr ) {
-	float dx = x2 - x1;
-	float dy = y2 - y1;
-	float a = dx * dx + dy * dy;
-	float b = 2 * (dx * (x1 - cx) + dy * (y1 - cy));
-	float c = cx * cx + cy * cy;
-	c += x1 * x1 + y1 * y1;
-	c -= 2 * (cx * x1 + cy * y1);
-	c -= cr * cr;
-	float bb4ac = b * b - 4 * a * c;
+int intersect() {
+	float cx = 5, cy = 5, r = 6;
+	float _b = 8.22;
+	float _m = -0.22;
+	//circle equation (let x,y be the coords of the intersections and be aware that
+	// there might be 2 intersections (x1,y1 and x2,y2))
 
-	// return false  No collision
-	// return true Collision
-	return bb4ac >= 0;
+	/*
+	 * Circle:  (x - cx)² + (y - cy)² = r²
+	 * Line  :  y = _m * x + _b
+	 *
+	 * Line in circle:
+	 * (x - cx)² + (_m * x + _b - cy)² = r² */
+	 float A = _b - cy;
+	 /* Solve for x:
+	 * x² - 2*cx*x + cx² + _m² * x² + 2*_m*x*A + A² = r²
+	 * x² + _m²*x² - 2*cx*x + 2*_m*x*A + cx² + A² - r² = 0
+	 * (1 + _m²)*x² - (2*cx + 2*_m*A)*x + (cx² + A² - r²) = 0
+	 * use abc formula: */
+	 float a = 1 + pow( _m, 2 );
+	 float b = 2 * cx + 2 * _m * A;
+	 float c = pow( cx, 2 ) + pow( A, 2 ) - pow( r, 2 );
+	 //insert in formula
+	 float powb = pow( b, 2 );
+	 /*
+	  * numerator: (-b + sqrt( powb - 4*a*c )
+	  * denominator: 2*a */
+	 float root = sqrt( powb - 4*a*c );
+	 float denom = 2 * a;
+	 b *= (-1);
+	 float x1 = (b + root) / denom;
+	 float x2 = (b - root) / denom;
 }
 
+
 int test2() {
-	circleLineIntersect( 8, 5, 0, 1, 4, 2, 3 );
+	intersect( );
 }
 
 int main() {
