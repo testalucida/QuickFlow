@@ -25,6 +25,13 @@ enum SymbolId {
 	//count = 12
 };
 
+enum Compass {
+	NORTH,
+	EAST,
+	SOUTH,
+	WEST
+};
+
 static const int ALL_SYMBOLS_COUNT  __attribute__ ((unused)) = 12;
 
 

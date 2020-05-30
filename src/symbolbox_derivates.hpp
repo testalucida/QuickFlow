@@ -265,30 +265,43 @@ public:
 	 */
 	virtual void getGluePoint( const Line& line, int& x, int& y ) const {
 		//first check roughly which part of the the symbolbox is hit by line
-		LinePtr border = getNorthBorder();
-		IntersectionPtr X = border->getIntersection( line );
-		if( X->intersects && X->withinSegments ) {
-
-			//fprintf( stderr, "intersecting north border\n" );
-			//line is coming in from north. Find intersection of line
-			//with the upper reversed bowl.
-			//get perpendicular from circle's center to line:
-//			LinePtr perp = line.getPerpendicular( _topReverseBowl->mx,
-//					                              _topReverseBowl->my );
-			//perp->x2/perp->y2 are the coords of the intersection.
-			//This point be F. Now search for the coords of the intersection
-			//of line with _topReversedBowl which be S.
-			//The center of the top reversed bowl may be M.
-			//First get the length of FM...
-//			float fm = perp->getLength();
-			//...then get length of FS..
-//			float fs = sqrt( pow( _topReverseBowl->r, 2 ) - pow( fm, 2 ) );
-			//...and calculate coords of S:
-			//x =
+		IntersectionBorderPtr intersectborder = getIntersectionBorder( line );
+		if( !intersectborder->intersect ) {
+			throw runtime_error( "DataStorage::getGluePoint():\n"
+								 "given line doesn't intersect.");
 		}
 
-		//delete that, it's only temporaryly until the calculation of the glue point is fixed
-		getCenter( x, y );
+		switch( intersectborder->border ) {
+		case Compass::NORTH: {
+			getCircleIntersection( x, y, line, _topReverseBowl->mx,
+											   _topReverseBowl->my,
+											   _topReverseBowl->r );
+			return;
+		}
+		case Compass::EAST:
+		case Compass::WEST:
+			if( intersectborder->y <= _line_top_y ) { //this->y() + _party ) {
+				getCircleIntersection( x, y, line, _topReverseBowl->mx,
+												   _topReverseBowl->my,
+												   _topReverseBowl->r  );
+			} else if( intersectborder->y >= _line_bottom_y ) {
+				getCircleIntersection( x, y, line, _topReverseBowl->mx,
+												   _bottombowl_y,
+												   _topReverseBowl->r  );
+			} else {
+				x = intersectborder->x;
+				y = intersectborder->y;
+			}
+			return;
+		case Compass::SOUTH:
+			getCircleIntersection( x, y, line, _topReverseBowl->mx,
+											   _bottombowl_y,
+											   _topReverseBowl->r );
+			return;
+		default:
+			throw runtime_error( "DataStorage::getGluePoint():\n"
+								 "No border intersection detected." );
+		}
 	}
 
 	~DataStorage() {}
@@ -303,7 +316,7 @@ protected:
 		fl_pop_clip();
 	}
 
-	inline void drawDataStorage() const {
+	inline void drawDataStorage() {
 		_topReverseBowl = getCircle();
 //		fprintf( stderr, "CIRCLE: ax = %f, ay = %f, "
 //				         "mx = %f, my = %f\n",
@@ -334,24 +347,25 @@ protected:
 								startAngle, angle, numSeg, 2 );
 
 		//bottom semicircle opening northwards
-		my += ( h() - ay );
+		_bottombowl_y = my;
+		_bottombowl_y += ( h() - ay );
 //		fprintf( stderr, "drawing yellow bowl: my(fltk): %f, "
 //				         "my(gl): %f\n", my, glY( my ) );
 //		gl_color( FL_YELLOW );
 		_glDrawing.drawArcFast( _topReverseBowl->mx,
-								glY( my ), _topReverseBowl->r,
+								glY( _bottombowl_y ), _topReverseBowl->r,
 								startAngle, angle, numSeg, 2 );
 
 //		gl_color( FL_GREEN );
 		float x1 = x() + 1; //circle->ax;
-		float y1 = y() + ay/2;
+		_line_top_y = y() + ay/2;
 		float x2 = x1 + w() - 2;
-		float y2 = y1 + h() - ay;
+		_line_bottom_y = _line_top_y + h() - ay;
 //		fprintf( stderr, "drawing straight from x1/y1 (fltk: %f/%f) resp. (gl: %f/%f) "
 //						 "to x1/y2 (fltk: %f/%f) resp. (gl: %f/%f)\n",
 //				         x1, y1, x1, glY(y1), x1, y2, x1, glY( y2 ) );
-		_glDrawing.drawLineSegment( x1, glY( y1 ), x1, glY( y2 ), 2 );
-		_glDrawing.drawLineSegment( x2, glY( y1 ), x2, glY( y2 ), 2 );
+		_glDrawing.drawLineSegment( x1, glY( _line_top_y ), x1, glY( _line_bottom_y ), 2 );
+		_glDrawing.drawLineSegment( x2, glY( _line_top_y ), x2, glY( _line_bottom_y ), 2 );
 
 	}
 
@@ -414,10 +428,49 @@ private:
 		return circle;
 	}
 
+	/**
+	 * NOTE: DO NOT USE FOR GENERALLY COMPUTING THE INTERSECTION OF THIS BOX
+	 * WITH A GIVEN CIRCLE.
+	 * Calculates the intersection between a given line and this DataStorage symbol.
+	 * Method assumes that there is at least one intersection and
+	 * returns the intersection point between the center of the given circle and
+	 * the center of the connected SymbolBox (that's why this method is special).
+	 */
+	void getCircleIntersection( int& x, int& y,
+						        const Line& line,
+			       	   	   	    float cx, float cy, float r ) const
+	{
+		CircleIntersectionsPtr intersect =
+				line.getCircleIntersections( cx, cy, r );
+		if ( intersect->numberOfIntersections < 1 ) {
+			throw runtime_error(
+					"DataStorage::getCircleIntersection():\n"
+							"no circle intersection." );
+		}
+		x = round( intersect->x1 );
+		y = round( intersect->y1 );
+		if ( intersect->numberOfIntersections > 1 ) {
+			//find out which intersection is between the center of the circle
+			//and the center of the other connected SymbolBox
+
+			if ( !(line.isLinePointInSegment( x, y )) ) {
+				x = round( intersect->x2 );
+				y = round( intersect->y2 );
+			}
+		}
+		//			cerr << "***********************" << endl;
+		//			fprintf( stderr, "connection from %d/%d to %d/%d\n", line.x1(), line.y1(), line.x2(), line.y2() );
+		//			fprintf( stderr, "center of top reverse bowl: %f/%f\n", _topReverseBowl->mx, _topReverseBowl->my );
+		//			fprintf( stderr, "intersection: %d/%d\n", x, y );
+	}
+
 private:
 	glDrawing& _glDrawing = glDrawing::inst();
 	int _party = 5;
-	mutable CirclePtr _topReverseBowl;
+	CirclePtr _topReverseBowl;
+	float _bottombowl_y = 0;
+	float _line_top_y = 0;
+	float _line_bottom_y = 0;
 };
 
 #endif /* SYMBOLBOX_DERIVATES_HPP_ */

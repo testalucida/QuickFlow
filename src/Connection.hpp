@@ -12,13 +12,7 @@
 #include <FL/fl_draw.H>
 #include "SymbolBox.hpp"
 #include <stdexcept>
-
-enum Compass {
-	NORTH,
-	EAST,
-	SOUTH,
-	WEST
-};
+#include "enums.h"
 
 class Connection {
 public:

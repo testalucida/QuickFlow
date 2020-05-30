@@ -133,6 +133,63 @@ public:
 	}
 
 protected:
+	struct IntersectionBorder {
+		Compass border = Compass::NORTH;
+		int x = 0;
+		int y = 0;
+		bool intersect = true;
+	};
+
+	typedef std::unique_ptr<IntersectionBorder> IntersectionBorderPtr;
+
+	/**
+	 * Checks which border the given line is intersecting and returns
+	 * the concerned border and the intersection point.
+	 * If line doesn't intersect this symbolbox IntersectionBorder::intersect is set
+	 * to false.
+	 */
+	IntersectionBorderPtr getIntersectionBorder( const Line& line ) const {
+		IntersectionBorderPtr intersectborder( new IntersectionBorder );
+		LinePtr border = getNorthBorder();
+		IntersectionPtr X = border->getIntersection( line );
+		if( X->intersects && X->withinSegments ) {
+			intersectborder->border = Compass::NORTH;
+			intersectborder->x = X->x;
+			intersectborder->y = X->y;
+			return intersectborder;
+		}
+
+		border = getEastBorder();
+		X = border->getIntersection( line );
+		if( X->intersects && X->withinSegments ) {
+			intersectborder->border = Compass::EAST;
+			intersectborder->x = X->x;
+			intersectborder->y = X->y;
+			return intersectborder;
+		}
+
+		border = getSouthBorder();
+		X = border->getIntersection( line );
+		if( X->intersects && X->withinSegments ) {
+			intersectborder->border = Compass::SOUTH;
+			intersectborder->x = X->x;
+			intersectborder->y = X->y;
+			return intersectborder;
+		}
+
+		border = getWestBorder();
+		X = border->getIntersection( line );
+		if( X->intersects && X->withinSegments ) {
+			intersectborder->border = Compass::WEST;
+			intersectborder->x = X->x;
+			intersectborder->y = X->y;
+			return intersectborder;
+		}
+
+		intersectborder->intersect = false;
+		return intersectborder;
+	}
+
 	/** get the Rectangle to draw the label text in. */
 	virtual FlxRect getLabelRect() const = 0;
 

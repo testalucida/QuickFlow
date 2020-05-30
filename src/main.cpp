@@ -66,48 +66,37 @@ int main_() {
 	return Fl::run();
 }
 
-
-int intersect() {
-	float cx = 5, cy = 5, r = 6;
-	float _b = 8.22;
-	float _m = -0.22;
-	//circle equation (let x,y be the coords of the intersections and be aware that
-	// there might be 2 intersections (x1,y1 and x2,y2))
-
-	/*
-	 * Circle:  (x - cx)² + (y - cy)² = r²
-	 * Line  :  y = _m * x + _b
-	 *
-	 * Line in circle:
-	 * (x - cx)² + (_m * x + _b - cy)² = r² */
-	 float A = _b - cy;
-	 /* Solve for x:
-	 * x² - 2*cx*x + cx² + _m² * x² + 2*_m*x*A + A² = r²
-	 * x² + _m²*x² - 2*cx*x + 2*_m*x*A + cx² + A² - r² = 0
-	 * (1 + _m²)*x² - (2*cx + 2*_m*A)*x + (cx² + A² - r²) = 0
-	 * use abc formula: */
-	 float a = 1 + pow( _m, 2 );
-	 float b = 2 * cx + 2 * _m * A;
-	 float c = pow( cx, 2 ) + pow( A, 2 ) - pow( r, 2 );
-	 //insert in formula
-	 float powb = pow( b, 2 );
-	 /*
-	  * numerator: (-b + sqrt( powb - 4*a*c )
-	  * denominator: 2*a */
-	 float root = sqrt( powb - 4*a*c );
-	 float denom = 2 * a;
-	 b *= (-1);
-	 float x1 = (b + root) / denom;
-	 float x2 = (b - root) / denom;
+void intersect_circle_vertical_line( const Line& line, float xC, float yC, float r ) {
+	//determine intersection S
+	float xS = line.x1();
+	float d = abs( xC - line.x1() );
+	if( d > r ) {
+		cerr << "no intersection" << endl;
+		return;
+	}
+//	float r2 = pow( r, 2 );
+//	float d2 = pow( d, 2 );
+	float u = sqrt( pow( r, 2 ) - pow( d, 2 ) );
+	float yS = yC + u;
+	cerr << "S: " << xS << "/" << yS << endl;
+	if( d != r ) {
+		float yS2 = yC - (yS - yC);
+		cerr << "S2: " << xS << "/" << yS2 << endl;
+	}
 }
 
-
 int test2() {
-	intersect( );
+	int xA = 12, yA = 12;
+	int xB = 12, yB = 2;
+	Line line( xA, yA, xB, yB );
+	float xC = 9, yC = 7;
+	float r = 3;
+	intersect_circle_vertical_line( line, xC, yC, r );
+	return 0;
 }
 
 int main() {
-	return test2();
+//	return test2();
 	FlowChartMainWindow *pWin =
 			new FlowChartMainWindow(200, 200, 500, 500 );
 
@@ -135,13 +124,13 @@ int main() {
 //	Connection* conn = canvas->createConnection( dec1, dec2 );
 //	conn->setLabel("Yes", dec1);
 
-//	DataStorage* ds = new DataStorage( 300, 200, 60, 60 );
-//	ctrl.addSymbol( ds );
+	DataStorage* ds = new DataStorage( 250, 250, 60, 60 );
+	ctrl.addSymbol( ds );
 
-//	Process* proc1 = new Process( 250, 250, 80, 70 );
-//	proc1->setLabel( "Executing process 1" );
-//	ctrl.addSymbol( proc1 );
-//	conn = canvas->createConnection( dec2, proc1 );
+	Process* proc1 = new Process( 200, 100, 80, 70 );
+	proc1->setLabel( "Executing process 1" );
+	ctrl.addSymbol( proc1 );
+	//Connection* conn = canvas->createConnection( ds, proc1 );
 //	conn->setLabel( "Proceed to process 1", dec2 );
 
 	Fl::gl_visual( FL_RGB );
