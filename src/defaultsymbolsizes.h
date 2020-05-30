@@ -19,7 +19,7 @@ static Size defaultSymbolSizes[] = {
 		{70, 70}, //Manual Input
 		{70, 70}, //Document
 		{70, 70}, //Manual Op
-		{60, 40}, //DataStorage
+		{50, 30}, //DataStorage
 		{70, 70}, //Connector
 		{70, 30}, //End
 		{70, 70}  //Unselect symbol

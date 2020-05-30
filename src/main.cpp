@@ -124,13 +124,13 @@ int main() {
 //	Connection* conn = canvas->createConnection( dec1, dec2 );
 //	conn->setLabel("Yes", dec1);
 
-	DataStorage* ds = new DataStorage( 250, 250, 60, 60 );
+	DataStorage* ds = new DataStorage( 250, 250 );
 	ctrl.addSymbol( ds );
 
-	Process* proc1 = new Process( 200, 100, 80, 70 );
+	Process* proc1 = new Process( 200, 100 );
 	proc1->setLabel( "Executing process 1" );
 	ctrl.addSymbol( proc1 );
-	//Connection* conn = canvas->createConnection( ds, proc1 );
+	Connection* conn = canvas->createConnection( ds, proc1 );
 //	conn->setLabel( "Proceed to process 1", dec2 );
 
 	Fl::gl_visual( FL_RGB );

@@ -28,7 +28,8 @@ CanvasController::~CanvasController() {
 }
 
 void CanvasController::onSymbolBoxPush_static( SymbolBox *box, int whichButton,
-		void *userdata ) {
+		                                       void *userdata )
+{
 	CanvasController *pThis = (CanvasController*) userdata;
 	pThis->onSymbolBoxPush( box, whichButton );
 }
@@ -77,10 +78,8 @@ void CanvasController::onCanvasPush( Fl_Widget *w ) {
 			int x = Fl::event_x();
 			int y = Fl::event_y();
 
-			// 1st: insert new symbol "A"
-
-			/*SymbolBox* pSymbol =*/ addSymbol( _symbolId, x, y );
-
+			SymbolBox* pSymbol = addSymbol( _symbolId, x, y );
+			pSymbol->toggleSelection( true );
 		}
 	}
 }

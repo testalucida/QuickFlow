@@ -42,7 +42,10 @@ typedef std::unique_ptr<Circle> CirclePtr;
 
 class Start : public SymbolBox {
 public:
-	Start(int x, int y, int w = 0, int h = 0 ) : SymbolBox(x, y, w, h)
+	Start(int x, int y,
+		  int w = defaultSymbolSizes[SymbolId::START].w,
+		  int h = defaultSymbolSizes[SymbolId::START].h )
+		: SymbolBox(x, y, w, h)
 	{
 	}
 
@@ -91,7 +94,10 @@ protected:
 
 class End : public Start {
 public:
-	End( int x, int y, int w = 0, int h = 0 ) : Start( x, y, w, h ) {}
+	End( int x, int y,
+		 int w = defaultSymbolSizes[SymbolId::END].w,
+		 int h = defaultSymbolSizes[SymbolId::END].h )
+		: Start( x, y, w, h ) {}
 	~End() {}
 	virtual SymbolId getSymbolId() const {return SymbolId::END;}
 	virtual FlxRect getLabelRect() const { return {x(), y(), w(), h()};}
@@ -103,7 +109,10 @@ protected:
 
 class Decision : public SymbolBox {
 public:
-	Decision(int x, int y, int w = 0, int h = 0 ) : SymbolBox(x, y, w, h)
+	Decision(int x, int y,
+			int w = defaultSymbolSizes[SymbolId::DECISION].w,
+			int h = defaultSymbolSizes[SymbolId::DECISION].h )
+		: SymbolBox(x, y, w, h)
 	{
 	}
 
@@ -190,7 +199,10 @@ protected:
 
 class Process : public SymbolBox {
 public:
-	Process(int x, int y, int w = 0, int h = 0 ) : SymbolBox(x, y, w, h)
+	Process(int x, int y,
+			int w = defaultSymbolSizes[SymbolId::PROCESS].w,
+			int h = defaultSymbolSizes[SymbolId::PROCESS].h )
+		: SymbolBox(x, y, w, h)
 	{
 	}
 
@@ -249,7 +261,12 @@ protected:
 
 class DataStorage : public SymbolBox {
 public:
-	DataStorage(int x, int y, int w = 0, int h = 0 ) : SymbolBox(x, y, w, h) {
+	DataStorage(int x, int y,
+			    int w = defaultSymbolSizes[SymbolId::DATA_STORAGE].w,
+			    int h = defaultSymbolSizes[SymbolId::DATA_STORAGE].h )
+		: SymbolBox(x, y, w, h)
+	{
+		_topReverseBowl = getCircle();
 	}
 
 	virtual SymbolId getSymbolId() const {return SymbolId::DATA_STORAGE;}
@@ -318,30 +335,19 @@ protected:
 
 	inline void drawDataStorage() {
 		_topReverseBowl = getCircle();
-//		fprintf( stderr, "CIRCLE: ax = %f, ay = %f, "
-//				         "mx = %f, my = %f\n",
-//						 circle->ax, circle->ay,
-//				         circle->mx, circle->my );
+
 		float startAngle = 0;
 		float angle = _glDrawing.getRadiantFromDegree( 180 );
 		int numSeg = _glDrawing.getNumCircleSegments( _topReverseBowl->r );
 		//top semicircle opening southwards (reverse bowl):
-//		fprintf( stderr, "drawing black reverse bowl: my(fltk): %f, "
-//						                             "my(gl): %f\n",
-//													 circle->my,
-//													 glY( circle->my ) );
 		_glDrawing.drawArcFast( _topReverseBowl->mx,
 								glY( _topReverseBowl->my ), _topReverseBowl->r,
 								startAngle, angle, numSeg, 2 );
 
 		//top semicircle opening northwards (bowl):
 		float ay = h()/_party * 2;
-//		fprintf( stderr, "ay = %f\n", ay );
 		float my = _topReverseBowl->my - 2*_topReverseBowl->r + ay;
-//		fprintf( stderr, "drawing blue bowl: my(fltk): %f, "
-//				                            "my(gl): %f\n", my, glY( my ) );
 		startAngle = _glDrawing.getRadiantFromDegree( 180 );
-//		gl_color( FL_BLUE );
 		_glDrawing.drawArcFast( _topReverseBowl->mx,
 								glY( my ), _topReverseBowl->r,
 								startAngle, angle, numSeg, 2 );
@@ -349,24 +355,17 @@ protected:
 		//bottom semicircle opening northwards
 		_bottombowl_y = my;
 		_bottombowl_y += ( h() - ay );
-//		fprintf( stderr, "drawing yellow bowl: my(fltk): %f, "
-//				         "my(gl): %f\n", my, glY( my ) );
-//		gl_color( FL_YELLOW );
 		_glDrawing.drawArcFast( _topReverseBowl->mx,
 								glY( _bottombowl_y ), _topReverseBowl->r,
 								startAngle, angle, numSeg, 2 );
 
-//		gl_color( FL_GREEN );
+		//draw the vertical lines left and right
 		float x1 = x() + 1; //circle->ax;
 		_line_top_y = y() + ay/2;
 		float x2 = x1 + w() - 2;
 		_line_bottom_y = _line_top_y + h() - ay;
-//		fprintf( stderr, "drawing straight from x1/y1 (fltk: %f/%f) resp. (gl: %f/%f) "
-//						 "to x1/y2 (fltk: %f/%f) resp. (gl: %f/%f)\n",
-//				         x1, y1, x1, glY(y1), x1, y2, x1, glY( y2 ) );
 		_glDrawing.drawLineSegment( x1, glY( _line_top_y ), x1, glY( _line_bottom_y ), 2 );
 		_glDrawing.drawLineSegment( x2, glY( _line_top_y ), x2, glY( _line_bottom_y ), 2 );
-
 	}
 
 	virtual void drawLabel() const {}
@@ -436,16 +435,28 @@ private:
 	 * returns the intersection point between the center of the given circle and
 	 * the center of the connected SymbolBox (that's why this method is special).
 	 */
-	void getCircleIntersection( int& x, int& y,
-						        const Line& line,
-			       	   	   	    float cx, float cy, float r ) const
+	inline void getCircleIntersection( int& x, int& y,
+										const Line& line,
+										float cx, float cy, float r ) const
 	{
 		CircleIntersectionsPtr intersect =
 				line.getCircleIntersections( cx, cy, r );
 		if ( intersect->numberOfIntersections < 1 ) {
-			throw runtime_error(
-					"DataStorage::getCircleIntersection():\n"
-							"no circle intersection." );
+			//happens sometimes when moving a symbolbox too fast
+			getCenter( x, y );
+			return;
+//			string msg = "DataStorage::getCircleIntersection():\n"
+//					"no circle intersection.\n" ;
+//			msg.append( "Points of connection line: " )
+//					.append( to_string(line.x1() ) )
+//					.append( "/" ).append( to_string( line.y1() ) )
+//					.append( ", ").append( to_string( line.x2() ) )
+//					.append( "/" ).append( to_string( line.y2() ) ).append( "\n" );
+//			msg.append( "Circle defined by center " ).append( to_string( cx ) )
+//					.append( "/" ).append( to_string( cy ) )
+//					.append( " with radius " ).append( to_string( r ) );
+//
+//			throw runtime_error( msg.c_str() );
 		}
 		x = round( intersect->x1 );
 		y = round( intersect->y1 );
